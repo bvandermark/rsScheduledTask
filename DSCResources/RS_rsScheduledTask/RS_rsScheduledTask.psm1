@@ -64,7 +64,12 @@
             if($tasks -notcontains $Name) {
                 Write-Verbose "Creating New Scheduled Task $Name $ExecutablePath $Params"
                 try{
-                    schtasks.exe /create /tn $Name /tr $($ExecutablePath, $Params -join ' ') /sc $IntervalModifier /mo $Interval /ru system /f
+                    if(@("ONSTART","ONLOGIN") -contains $IntervalModifier){
+                        schtasks.exe /create /tn $Name /tr $($ExecutablePath, $Params -join ' ') /sc $IntervalModifier /ru system /f
+                    }
+                    else{
+                        schtasks.exe /create /tn $Name /tr $($ExecutablePath, $Params -join ' ') /sc $IntervalModifier /mo $Interval /ru system /f
+                    }
                 }
                 catch {
                     Write-EventLog -LogName DevOps -Source RS_rsScheduledTask -EntryType Information -EventId 1000 -Message "Failed to create scheduled task $Name `n $_.Exception.Message"
